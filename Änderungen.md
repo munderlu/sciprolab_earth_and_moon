@@ -199,5 +199,35 @@ Nach den Änderungen: gültiges JSON (15 Zellen), keine verbleibenden `distance_
 
 ---
 
+## 7. Könnte man kritisieren? (Stilfrage, kein Bug)
+
+### `calculate_gravity()` ist nicht vektorisiert
+
+Die Methode iteriert mit einer doppelten Python-`for`-Schleife über alle Körperpaare:
+```python
+for i in range(len(self.bodies)):
+    for j in range(i + 1, len(self.bodies)):
+        ...
+```
+Innerhalb der Schleife werden zwar NumPy-Vektoren genutzt (`np.linalg.norm`, Vektor-
+subtraktion), aber die paarweise Kraftberechnung selbst läuft als reine Python-Schleife
+statt über NumPy-Broadcasting (z. B. via `np.newaxis`, eine Differenzmatrix aller
+Positionen, vektorisierte Distanz- und Kraftberechnung in wenigen Zeilen ohne Schleife).
+
+**Warum das in einem „Scientific Programming Lab" auffallen könnte:** Solche Kurse legen
+häufig Wert darauf, NumPy nicht nur als Container für Vektoren zu nutzen, sondern für
+vektorisierte Berechnungen ("NumPy als Rechenwerkzeug statt nur als Datenstruktur"). Eine
+doppelte Python-Schleife über Body-Paare bedeutet bei N Körpern O(N²) reinen
+Python-Overhead statt vektorisierter NumPy-Operationen.
+
+**Relevanz hier:** Bei 2–3 Körpern (Erde, Mond, Theia) ist der Performance-Unterschied
+vernachlässigbar – der Punkt ist rein stilistisch/didaktisch, kein funktionaler Fehler.
+Ob der Professor das als Abzugskriterium wertet, lässt sich nicht pauschal sagen; eine
+vektorisierte Variante ließe sich aber leicht als Alternative neben der bestehenden
+Schleifen-Implementierung ergänzen, falls ihr auf der sicheren Seite sein wollt.
+
+---
+
 *Erstellt am 2026-06-16 durch automatischen Vergleich gegen Commit `7426c3a`;
-Abschnitt 6 ergänzt nach Umsetzung der Korrekturen.*
+Abschnitt 6 ergänzt nach Umsetzung der Korrekturen, Abschnitt 7 ergänzt nach Diskussion
+über NumPy-Vektorisierung.*
