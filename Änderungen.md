@@ -228,6 +228,123 @@ Schleifen-Implementierung ergänzen, falls ihr auf der sicheren Seite sein wollt
 
 ---
 
+---
+
+## 8. Zweiter Review-Durchgang (Stand 2026-06-16) – neue Befunde
+
+Erneute Durchsicht des **aktuellen** Notebook-Stands. Die folgenden Punkte sind **noch nicht
+umgesetzt** – es sind Vorschläge zur Diskussion. Reihenfolge nach Wichtigkeit.
+
+### 🐞 8.1 Startzustand (t=0) wird nicht in `history` gespeichert  *(verifiziert)*
+
+`Simulation.step()` ruft erst `check_collisions()` / `calculate_gravity()` auf, **bewegt** dann
+alle Körper um einen vollen Zeitschritt und **hängt erst danach** die Position an `history` an.
+Folge: Der **Anfangszustand bei t=0 fehlt** komplett – der erste gespeicherte Eintrag ist
+bereits die Position nach einem Zeitschritt.
+
+**Verifikation** (bewegter Einzelkörper, `v=[10,0,0]`, 3 Schritte):
+```
+Gespeicherte X-Positionen: [10. 20. 30.]   # erwartet wäre [0. 10. 20.] oder [0. 10. 20. 30.]
+-> Startposition x=0 fehlt? True
+```
+
+**Auswirkung:** gering, aber real – Animationen starten eine Zeitschritt-Breite „zu spät", und
+`_min_distance` kann einen exakt bei t=0 liegenden kleinsten Abstand verpassen (bei Theia aus
+4 Mio. km unkritisch, prinzipiell aber falsch).
+
+**Fix-Vorschlag** – Initialposition einmalig vor dem Lauf aufzeichnen, z. B. am Anfang von `run()`:
+```python
+def run(self, total_time):
+    if self.recorded_steps == 0:          # Startzustand t=0 festhalten
+        for name in self.history:
+            alive = next((b for b in self.bodies if b.name == name), None)
+            self.history[name].append(alive.position.copy() if alive else np.full(3, np.nan))
+        self.recorded_steps += 1
+    steps = int(total_time / self.time_step)
+    for _ in range(steps):
+        self.step()
+```
+(Alternativ direkt in `step()` **vor** dem Bewegen speichern statt danach.)
+
+### 🐞 8.2 `input()` blockiert „Run All" / macht das Notebook nicht reproduzierbar
+
+Zelle mit dem `Visualizer` (Erde-Mond-Basis) fragt die Ansicht interaktiv ab:
+```python
+auswahl = input("Ansicht wählen (1=Standard, 2=Oben, 3=Seite): ").strip()
+```
+Bei „Alle Zellen ausführen" **hängt** das Notebook an dieser Stelle und wartet auf Eingabe;
+beim automatischen Bewerten/Re-Run ist das Verhalten nicht reproduzierbar.
+
+**Fix-Vorschlag:** feste Default-Ansicht als Variable, Alternativen als Kommentar – analog zur
+Basis-Zelle:
+```python
+vis = Visualizer(simulation)
+view = 'standard'        # Alternativen: 'top' (Draufsicht) / 'side' (Seitenansicht)
+anim = vis.animate_3d(view=view)
+anim
+```
+
+### 📄 8.3 Abschnitt 3 dieser Datei ist gegenüber dem Code veraltet
+
+Abschnitt 3 beschreibt für `animate_3d()` die Parameter **`speed`** (`interval = 50 ms / speed`)
+und **`dpi`** als eigenen Parameter. Im aktuellen Code existieren beide **nicht**:
+- tatsächliche Signatur: `animate_3d(self, view='standard', performance_mode=False, max_frames=150, dynamic_scaling=False, figsize=None)`
+- `interval = 50` ist **fest**; die Geschwindigkeit wird laut Docstring über die +/- Buttons des
+  jshtml-Players geregelt.
+
+**Fix-Vorschlag:** Abschnitt 3 entsprechend korrigieren (kein `speed`-Parameter, `dpi` wird intern
+abhängig von `performance_mode` gesetzt, nicht übergeben). Reiner Doku-Abgleich, kein Code-Bug.
+
+### ⚠️ 8.4 Rückgabewert von `check_collisions()` wird nie genutzt
+
+`check_collisions()` baut `collCheck` auf und gibt es zurück, `step()` ignoriert den Wert aber.
+Entweder verwenden (z. B. um nach einer Verschmelzung etwas zu loggen) oder den Rückgabewert
+entfernen. Kein Bug, nur toter Code.
+
+### ⚠️ 8.5 Robustheit: Division durch Null in `calculate_geometry()`
+
+```python
+senkrecht_vektor = np.array([-r_erde_mond[1], r_erde_mond[0], 0.0])
+senkrecht_normiert = senkrecht_vektor / np.linalg.norm(senkrecht_vektor)
+```
+Liegt die Erde-Mond-Linie rein entlang der Z-Achse (x=y=0), ist `senkrecht_vektor = [0,0,0]` →
+Division durch Null (NaN). In den vorhandenen Setups (Erde/Mond in der X/Y-Ebene) tritt das nicht
+auf, daher nur ein Robustheits-Hinweis – ggf. Norm prüfen und einen Fallback-Senkrechtenvektor
+wählen.
+
+### 🧹 8.6 Mehrfache / lokale Imports (Cleanup)
+
+- `import numpy as np` steht in der `Body`-Zelle **und** in der `ScenarioController`-Zelle;
+  `import math` taucht mehrfach auf.
+- `import matplotlib.colors as mcolors` steht **innerhalb** von `_blend_colors()` (wird bei jeder
+  Verschmelzung neu ausgeführt).
+
+Kein funktionaler Fehler, aber sauberer wäre, die Imports gebündelt einmal oben zu halten.
+
+### ℹ️ 8.7 Markdown-Formel des Gravitationsgesetzes (Didaktik)
+
+Die Markdown-Zelle schreibt die Kraft als Vektorgleichung
+$\vec{F}_{ji} = -G\,\frac{m_i m_j}{\lVert \vec r_{ji}\rVert^{2}}$, hat auf der rechten Seite aber
+**keine Richtungsangabe** (Einheitsvektor). Konsistent vektoriell wäre
+$\vec{F}_{ji} = -G\,\frac{m_i m_j}{\lVert \vec r_{ji}\rVert^{2}}\,\hat{r}_{ji}$ bzw.
+$-G\,\frac{m_i m_j}{\lVert \vec r_{ji}\rVert^{3}}\,\vec r_{ji}$. Der **Code** ist korrekt (er nutzt
+`direction = r_vector / distance`); nur der Formeltext ist verkürzt. Reine Darstellungs-/Doku-Frage.
+
+### Status-Übersicht Abschnitt 8
+
+| # | Befund | Schweregrad | Status |
+|---|---|---|---|
+| 8.1 | t=0 fehlt in `history` | Bug (gering) | offen – Fix vorgeschlagen |
+| 8.2 | `input()` blockiert Run-All | Usability-Bug | offen – Fix vorgeschlagen |
+| 8.3 | Abschnitt 3 veraltet (`speed`/`dpi`) | Doku | offen |
+| 8.4 | ungenutzter Rückgabewert | toter Code | offen |
+| 8.5 | Division durch Null (Edge Case) | Robustheit | offen |
+| 8.6 | Mehrfach-/lokale Imports | Stil | offen |
+| 8.7 | Formeltext ohne Richtungsvektor | Doku/Didaktik | offen |
+
+---
+
 *Erstellt am 2026-06-16 durch automatischen Vergleich gegen Commit `7426c3a`;
 Abschnitt 6 ergänzt nach Umsetzung der Korrekturen, Abschnitt 7 ergänzt nach Diskussion
-über NumPy-Vektorisierung.*
+über NumPy-Vektorisierung; Abschnitt 8 ergänzt nach zweitem Review-Durchgang (neue,
+noch offene Befunde).*
