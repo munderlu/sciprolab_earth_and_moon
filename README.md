@@ -86,4 +86,4 @@ Automatisiert das mathematische Aufsetzen und die Parameter-Sweeps für speziell
 - __init__(self, speed_magnitude, target_type): Konstruktor zur Konfiguration des jeweiligen Testlaufs.
 - calculate_geometry(self): Berechnet die exakten initialen 3D-Positionsvektoren für das gewählte geometrische Startlayout.
 - calculate_velocity_vector(self, start_pos, target_pos): Bestimmt den präzisen, normierten Richtungsvektor vom Start zum gewählten Ziel und skaliert ihn mit der Geschwindigkeit.
-- setup_simulation(self): Erstellt eine spielbereite Instanz der Klasse Simulation und fügt die Himmelskörper hinzu.
+- setup_theia(self): Erstellt eine spielbereite Instanz der Klasse Simulation und fügt die Himmelskörper hinzu.
