@@ -457,7 +457,7 @@ gelangen.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio]{class_diagram.png}}
+\pandocbounded{\includegraphics[keepaspectratio]{img/class_diagram.png}}
 \caption{Bild}
 \end{figure}
 
@@ -1375,6 +1375,12 @@ festem Maßstab, der das ganze System im Blick behält.
 \end{Verbatim}
 \end{tcolorbox}
 
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{img/earth_moon_simulation.png}}
+\caption{Bild}
+\end{figure}
+
     \section{Theia-Physik}\label{theia-physik}
 
 
@@ -1590,46 +1596,54 @@ abschließend je ein repräsentatives Kollisions- und Vorbeiflug-Szenario
 in 3D.
 
     \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
-\prompt{In}{incolor}{ }{\boxspacing}
+\prompt{In}{incolor}{51}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-\PY{c+c1}{\PYZsh{} \PYZhy{}\PYZhy{}\PYZhy{} AUFGABE 2.2: Systematischer Durchlauf aller geforderten Theia\PYZhy{}Konfigurationen \PYZhy{}\PYZhy{}\PYZhy{}}
-\PY{c+c1}{\PYZsh{} Ablauf dieser Zelle in drei Schritten:}
-\PY{c+c1}{\PYZsh{}   1) Hilfsfunktionen definieren (Sim aufbauen, Abstandsverlauf, Körper finden, ein Szenario laufen lassen)}
-\PY{c+c1}{\PYZsh{}   2) Alle 9 Kombinationen (3 Geschwindigkeiten x 3 Zielrichtungen) durchrechnen}
-\PY{c+c1}{\PYZsh{}   3) Ergebnisse als Tabelle ausgeben und die kollisionsfreien Fälle herausfiltern}
-\PY{k+kn}{import}\PY{+w}{ }\PY{n+nn}{io}\PY{o}{,}\PY{+w}{ }\PY{n+nn}{contextlib}
+\PY{c+c1}{\PYZsh{} ============================================================================}
+\PY{c+c1}{\PYZsh{} Erst Hilfsfunktionen, dann 3x3 = 9 Szenarien, am Ende eine Ergebnistabelle.}
+\PY{c+c1}{\PYZsh{} ============================================================================}
+
+\PY{c+c1}{\PYZsh{} numpy stellt Vektor\PYZhy{}/Array\PYZhy{}Rechnung bereit (Positionen, Abstaende, np.inf usw.).}
 \PY{k+kn}{import}\PY{+w}{ }\PY{n+nn}{numpy}\PY{+w}{ }\PY{k}{as}\PY{+w}{ }\PY{n+nn}{np}
 
-\PY{n}{KM\PYZus{}PER\PYZus{}S\PYZus{}TO\PYZus{}M\PYZus{}PER\PYZus{}DAY} \PY{o}{=} \PY{l+m+mi}{1000} \PY{o}{*} \PY{l+m+mi}{86400}   \PY{c+c1}{\PYZsh{} km/s \PYZhy{}\PYZgt{} m/Tag}
+\PY{n}{KM\PYZus{}PER\PYZus{}S\PYZus{}TO\PYZus{}M\PYZus{}PER\PYZus{}DAY} \PY{o}{=} \PY{l+m+mi}{1000} \PY{o}{*} \PY{l+m+mi}{86400}
+
 
 \PY{k}{def}\PY{+w}{ }\PY{n+nf}{baue\PYZus{}erde\PYZus{}mond\PYZus{}sim}\PY{p}{(}\PY{n}{time\PYZus{}step}\PY{p}{)}\PY{p}{:}
-\PY{+w}{    }\PY{l+s+sd}{\PYZdq{}\PYZdq{}\PYZdq{}Frische Simulation mit ruhender Erde und Mond auf stabiler Kreisbahn.\PYZdq{}\PYZdq{}\PYZdq{}}
-    \PY{c+c1}{\PYZsh{} Für jedes Szenario wird bewusst eine NEUE Simulation gebaut, damit sich die}
-    \PY{c+c1}{\PYZsh{} Läufe nicht gegenseitig beeinflussen (gleiche Startbedingungen für jeden Test).}
+\PY{+w}{    }\PY{l+s+sd}{\PYZdq{}\PYZdq{}\PYZdq{}Baut eine frische Simulation mit Erde (ruhend) und Mond (auf Kreisbahn).\PYZdq{}\PYZdq{}\PYZdq{}}
+
+    \PY{c+c1}{\PYZsh{} Neue, leere Simulation mit dem gewuenschten Zeitschritt anlegen.}
     \PY{n}{sim} \PY{o}{=} \PY{n}{Simulation}\PY{p}{(}\PY{n}{time\PYZus{}step}\PY{p}{)}
+    \PY{c+c1}{\PYZsh{}Position, Radius, Masse}
     \PY{n}{sim}\PY{o}{.}\PY{n}{add\PYZus{}body}\PY{p}{(}\PY{n}{Body}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Erde}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,}         \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mf}{12.573} \PY{o}{*} \PY{l+m+mi}{86400}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{l+m+mi}{6371000}\PY{p}{,} \PY{l+m+mf}{5.972e24}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{blue}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{p}{)}
     \PY{n}{sim}\PY{o}{.}\PY{n}{add\PYZus{}body}\PY{p}{(}\PY{n}{Body}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Mond}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{384400000}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,}  \PY{l+m+mi}{1022}   \PY{o}{*} \PY{l+m+mi}{86400}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{l+m+mi}{1737000}\PY{p}{,} \PY{l+m+mf}{7.348e22}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{grey}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{p}{)}
+
     \PY{k}{return} \PY{n}{sim}
 
 
 \PY{k}{def}\PY{+w}{ }\PY{n+nf}{\PYZus{}abstand\PYZus{}verlauf}\PY{p}{(}\PY{n}{sim}\PY{p}{,} \PY{n}{name\PYZus{}a}\PY{p}{,} \PY{n}{name\PYZus{}b}\PY{p}{)}\PY{p}{:}
-\PY{+w}{    }\PY{l+s+sd}{\PYZdq{}\PYZdq{}\PYZdq{}Gibt (tage\PYZus{}array, abstand\PYZus{}km\PYZus{}array) bis zum frühesten Kollisionsende zurück.\PYZdq{}\PYZdq{}\PYZdq{}}
-    \PY{c+c1}{\PYZsh{} Greift auf die gespeicherte history beider Körper zu und berechnet pro Zeitschritt}
-    \PY{c+c1}{\PYZsh{} den euklidischen Abstand. Wird unten für das Abstandsdiagramm gebraucht.}
+\PY{+w}{    }\PY{l+s+sd}{\PYZdq{}\PYZdq{}\PYZdq{}Liefert den zeitlichen Abstand zweier Koerper als (tage, abstand\PYZus{}in\PYZus{}km).\PYZdq{}\PYZdq{}\PYZdq{}}
+
+    \PY{c+c1}{\PYZsh{} Gespeicherte Positionen von Koerper A aus der history holen und in ein float\PYZhy{}Array packen.}
     \PY{n}{ha} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n}{sim}\PY{o}{.}\PY{n}{history}\PY{o}{.}\PY{n}{get}\PY{p}{(}\PY{n}{name\PYZus{}a}\PY{p}{,} \PY{p}{[}\PY{p}{]}\PY{p}{)}\PY{p}{,} \PY{n}{dtype}\PY{o}{=}\PY{n+nb}{float}\PY{p}{)}
     \PY{n}{hb} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n}{sim}\PY{o}{.}\PY{n}{history}\PY{o}{.}\PY{n}{get}\PY{p}{(}\PY{n}{name\PYZus{}b}\PY{p}{,} \PY{p}{[}\PY{p}{]}\PY{p}{)}\PY{p}{,} \PY{n}{dtype}\PY{o}{=}\PY{n+nb}{float}\PY{p}{)}
     \PY{k}{if} \PY{n}{ha}\PY{o}{.}\PY{n}{size} \PY{o}{==} \PY{l+m+mi}{0} \PY{o+ow}{or} \PY{n}{hb}\PY{o}{.}\PY{n}{size} \PY{o}{==} \PY{l+m+mi}{0}\PY{p}{:}
         \PY{k}{return} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{p}{]}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{p}{]}\PY{p}{)}
-    \PY{n}{n} \PY{o}{=} \PY{n+nb}{min}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{ha}\PY{p}{)}\PY{p}{,} \PY{n+nb}{len}\PY{p}{(}\PY{n}{hb}\PY{p}{)}\PY{p}{)}                          \PY{c+c1}{\PYZsh{} auf gemeinsame Länge kürzen}
-    \PY{n}{tage} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{arange}\PY{p}{(}\PY{n}{n}\PY{p}{)} \PY{o}{*} \PY{n}{sim}\PY{o}{.}\PY{n}{time\PYZus{}step}                \PY{c+c1}{\PYZsh{} Schrittindex \PYZhy{}\PYZgt{} Tage}
-    \PY{n}{dist} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{linalg}\PY{o}{.}\PY{n}{norm}\PY{p}{(}\PY{n}{ha}\PY{p}{[}\PY{p}{:}\PY{n}{n}\PY{p}{]} \PY{o}{\PYZhy{}} \PY{n}{hb}\PY{p}{[}\PY{p}{:}\PY{n}{n}\PY{p}{]}\PY{p}{,} \PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)} \PY{o}{/} \PY{l+m+mi}{1000}   \PY{c+c1}{\PYZsh{} Meter \PYZhy{}\PYZgt{} km}
+
+    \PY{c+c1}{\PYZsh{} Beide Verlaeufe auf die gleiche (kuerzere) Laenge bringen, damit sie zusammenpassen.}
+    \PY{n}{n} \PY{o}{=} \PY{n+nb}{min}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{ha}\PY{p}{)}\PY{p}{,} \PY{n+nb}{len}\PY{p}{(}\PY{n}{hb}\PY{p}{)}\PY{p}{)}
+
+    \PY{c+c1}{\PYZsh{} (Index * Zeitschritt).}
+    \PY{n}{tage} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{arange}\PY{p}{(}\PY{n}{n}\PY{p}{)} \PY{o}{*} \PY{n}{sim}\PY{o}{.}\PY{n}{time\PYZus{}step}
+
+    \PY{c+c1}{\PYZsh{} Pro Zeitschritt den Abstand berechnen (Betrag der Differenzvektoren) und in km umrechnen.}
+    \PY{n}{dist} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{linalg}\PY{o}{.}\PY{n}{norm}\PY{p}{(}\PY{n}{ha}\PY{p}{[}\PY{p}{:}\PY{n}{n}\PY{p}{]} \PY{o}{\PYZhy{}} \PY{n}{hb}\PY{p}{[}\PY{p}{:}\PY{n}{n}\PY{p}{]}\PY{p}{,} \PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)} \PY{o}{/} \PY{l+m+mi}{1000}
+
     \PY{k}{return} \PY{n}{tage}\PY{p}{,} \PY{n}{dist}
 
 
 \PY{k}{def}\PY{+w}{ }\PY{n+nf}{finde\PYZus{}koerper}\PY{p}{(}\PY{n}{sim}\PY{p}{,} \PY{n}{name}\PY{p}{)}\PY{p}{:}
-\PY{+w}{    }\PY{l+s+sd}{\PYZdq{}\PYZdq{}\PYZdq{}Liefert den noch lebenden Körper mit genau diesem Namen, sonst None.\PYZdq{}\PYZdq{}\PYZdq{}}
-    \PY{c+c1}{\PYZsh{} Nach einer Verschmelzung heißt der Körper z.B. \PYZdq{}Erde+Theia\PYZdq{}; ein exakter}
-    \PY{c+c1}{\PYZsh{} Namensvergleich liefert daher None, sobald der Einzelkörper nicht mehr existiert.}
+\PY{+w}{    }\PY{l+s+sd}{\PYZdq{}\PYZdq{}\PYZdq{}Sucht den lebenden Koerper mit genau diesem Namen; gibt None zurueck, wenn es ihn nicht (mehr) gibt.\PYZdq{}\PYZdq{}\PYZdq{}}
+
     \PY{k}{for} \PY{n}{b} \PY{o+ow}{in} \PY{n}{sim}\PY{o}{.}\PY{n}{bodies}\PY{p}{:}
         \PY{k}{if} \PY{n}{b}\PY{o}{.}\PY{n}{name} \PY{o}{==} \PY{n}{name}\PY{p}{:}
             \PY{k}{return} \PY{n}{b}
@@ -1637,84 +1651,88 @@ in 3D.
 
 
 \PY{k}{def}\PY{+w}{ }\PY{n+nf}{run\PYZus{}theia\PYZus{}scenario}\PY{p}{(}\PY{n}{speed\PYZus{}kms}\PY{p}{,} \PY{n}{target}\PY{p}{,} \PY{n}{total\PYZus{}time}\PY{o}{=}\PY{l+m+mi}{30}\PY{p}{,} \PY{n}{time\PYZus{}step}\PY{o}{=}\PY{l+m+mf}{0.002}\PY{p}{)}\PY{p}{:}
-\PY{+w}{    }\PY{l+s+sd}{\PYZdq{}\PYZdq{}\PYZdq{}}
-\PY{l+s+sd}{    Baut Erde+Mond, injiziert Theia und lässt das System laufen.}
-\PY{l+s+sd}{    Der Kollisionstag wird direkt beim Schritt erfasst, an dem sich die}
-\PY{l+s+sd}{    Körperzahl verringert (= Verschmelzung), statt ihn nachträglich zu raten.}
-\PY{l+s+sd}{    Die kleinsten Abstände messen wir dabei mit der Methode}
-\PY{l+s+sd}{    Body.get\PYZus{}distance\PYZus{}to\PYZus{}body, solange Theia und Erde/Mond noch getrennt sind.}
-\PY{l+s+sd}{    Returns: (sim, ergebnis\PYZhy{}dict)}
-\PY{l+s+sd}{    \PYZdq{}\PYZdq{}\PYZdq{}}
+\PY{+w}{    }\PY{l+s+sd}{\PYZdq{}\PYZdq{}\PYZdq{}Baut Erde+Mond, schiesst Theia hinein und laesst das System laufen. Returns (sim, ergebnis\PYZhy{}dict).\PYZdq{}\PYZdq{}\PYZdq{}}
+
     \PY{n}{sim} \PY{o}{=} \PY{n}{baue\PYZus{}erde\PYZus{}mond\PYZus{}sim}\PY{p}{(}\PY{n}{time\PYZus{}step}\PY{p}{)}
-    \PY{c+c1}{\PYZsh{} Geschwindigkeit von km/s in m/Tag umrechnen, da die Simulation in Tagen rechnet.}
+
     \PY{n}{controller} \PY{o}{=} \PY{n}{ScenarioController}\PY{p}{(}
         \PY{n}{speed\PYZus{}magnitude}\PY{o}{=}\PY{n}{speed\PYZus{}kms} \PY{o}{*} \PY{n}{KM\PYZus{}PER\PYZus{}S\PYZus{}TO\PYZus{}M\PYZus{}PER\PYZus{}DAY}\PY{p}{,}
         \PY{n}{target\PYZus{}type}\PY{o}{=}\PY{n}{target}
     \PY{p}{)}
-    \PY{c+c1}{\PYZsh{} setup\PYZus{}theia gibt eine print\PYZhy{}Meldung aus; die unterdrücken wir hier bewusst,}
-    \PY{c+c1}{\PYZsh{} damit die spätere Ergebnistabelle nicht von 9 Meldungen zugemüllt wird.}
-    \PY{k}{with} \PY{n}{contextlib}\PY{o}{.}\PY{n}{redirect\PYZus{}stdout}\PY{p}{(}\PY{n}{io}\PY{o}{.}\PY{n}{StringIO}\PY{p}{(}\PY{p}{)}\PY{p}{)}\PY{p}{:}
-        \PY{n}{controller}\PY{o}{.}\PY{n}{setup\PYZus{}theia}\PY{p}{(}\PY{n}{sim}\PY{p}{)}
 
-    \PY{c+c1}{\PYZsh{} \PYZhy{}\PYZhy{}\PYZhy{} Schritt\PYZhy{}Schleife: Kollisionstag und kleinste Abstände erfassen \PYZhy{}\PYZhy{}\PYZhy{}}
+    \PY{n}{controller}\PY{o}{.}\PY{n}{setup\PYZus{}theia}\PY{p}{(}\PY{n}{sim}\PY{p}{)}
     \PY{n}{steps} \PY{o}{=} \PY{n+nb}{int}\PY{p}{(}\PY{n}{total\PYZus{}time} \PY{o}{/} \PY{n}{time\PYZus{}step}\PY{p}{)}
-    \PY{n}{anzahl\PYZus{}koerper} \PY{o}{=} \PY{n+nb}{len}\PY{p}{(}\PY{n}{sim}\PY{o}{.}\PY{n}{bodies}\PY{p}{)}   \PY{c+c1}{\PYZsh{} Startwert (3 Körper); sinkt bei jeder Verschmelzung}
+    \PY{n}{anzahl\PYZus{}koerper} \PY{o}{=} \PY{n+nb}{len}\PY{p}{(}\PY{n}{sim}\PY{o}{.}\PY{n}{bodies}\PY{p}{)}
     \PY{n}{kollisions\PYZus{}tag} \PY{o}{=} \PY{k+kc}{None}
-    \PY{n}{min\PYZus{}abstand\PYZus{}erde} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{inf}          \PY{c+c1}{\PYZsh{} mit Unendlich starten, damit das erste min() greift}
-    \PY{n}{min\PYZus{}abstand\PYZus{}mond} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{inf}
-    \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{steps}\PY{p}{)}\PY{p}{:}
-        \PY{n}{sim}\PY{o}{.}\PY{n}{step}\PY{p}{(}\PY{p}{)}
 
-        \PY{c+c1}{\PYZsh{} Kleinste Abstände über die Kollegen\PYZhy{}Methode get\PYZus{}distance\PYZus{}to\PYZus{}body}
-        \PY{c+c1}{\PYZsh{} (nur solange Theia noch als eigener Körper existiert, d.h. nicht verschmolzen ist)}
+    \PY{c+c1}{\PYZsh{} mit Unendlich starten, damit das erste min() greift.}
+    \PY{n}{min\PYZus{}abstand\PYZus{}erde} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{inf}
+    \PY{n}{min\PYZus{}abstand\PYZus{}mond} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{inf}
+
+    \PY{c+c1}{\PYZsh{} Simulation Schritt fuer Schritt vorwaerts rechnen.}
+    \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{steps}\PY{p}{)}\PY{p}{:}
+
+        \PY{n}{sim}\PY{o}{.}\PY{n}{step}\PY{p}{(}\PY{p}{)}
         \PY{n}{theia} \PY{o}{=} \PY{n}{finde\PYZus{}koerper}\PY{p}{(}\PY{n}{sim}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Theia}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+
+        \PY{c+c1}{\PYZsh{} Nur wenn Theia noch getrennt existiert}
         \PY{k}{if} \PY{n}{theia} \PY{o+ow}{is} \PY{o+ow}{not} \PY{k+kc}{None}\PY{p}{:}
+
+            \PY{c+c1}{\PYZsh{} Erde und Mond als eigenen Koerper suchen.}
             \PY{n}{erde} \PY{o}{=} \PY{n}{finde\PYZus{}koerper}\PY{p}{(}\PY{n}{sim}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Erde}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
             \PY{n}{mond} \PY{o}{=} \PY{n}{finde\PYZus{}koerper}\PY{p}{(}\PY{n}{sim}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Mond}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+
+            \PY{c+c1}{\PYZsh{} kleinsten Abstand Theia\PYZhy{}Erde und Theia\PYZhy{}Mond aktualisieren.}
             \PY{k}{if} \PY{n}{erde} \PY{o+ow}{is} \PY{o+ow}{not} \PY{k+kc}{None}\PY{p}{:}
                 \PY{n}{min\PYZus{}abstand\PYZus{}erde} \PY{o}{=} \PY{n+nb}{min}\PY{p}{(}\PY{n}{min\PYZus{}abstand\PYZus{}erde}\PY{p}{,} \PY{n}{theia}\PY{o}{.}\PY{n}{get\PYZus{}distance\PYZus{}to\PYZus{}body}\PY{p}{(}\PY{n}{erde}\PY{p}{)}\PY{p}{)}
             \PY{k}{if} \PY{n}{mond} \PY{o+ow}{is} \PY{o+ow}{not} \PY{k+kc}{None}\PY{p}{:}
                 \PY{n}{min\PYZus{}abstand\PYZus{}mond} \PY{o}{=} \PY{n+nb}{min}\PY{p}{(}\PY{n}{min\PYZus{}abstand\PYZus{}mond}\PY{p}{,} \PY{n}{theia}\PY{o}{.}\PY{n}{get\PYZus{}distance\PYZus{}to\PYZus{}body}\PY{p}{(}\PY{n}{mond}\PY{p}{)}\PY{p}{)}
 
-        \PY{c+c1}{\PYZsh{} Sobald weniger Körper als zuvor existieren, hat in genau diesem Schritt eine}
-        \PY{c+c1}{\PYZsh{} Verschmelzung stattgefunden \PYZhy{}\PYZgt{} das ist der (erste) Kollisionstag.}
+        \PY{c+c1}{\PYZsh{} Sind es weniger Koerper als vorher \PYZhy{}\PYZgt{} eine Verschmelzung hat stattgefunden.}
+        \PY{c+c1}{\PYZsh{} Den Kollisionstag nur beim ersten Mal setzen: Schrittnummer * Zeitschritt = Tag.}
         \PY{k}{if} \PY{n}{kollisions\PYZus{}tag} \PY{o+ow}{is} \PY{k+kc}{None} \PY{o+ow}{and} \PY{n+nb}{len}\PY{p}{(}\PY{n}{sim}\PY{o}{.}\PY{n}{bodies}\PY{p}{)} \PY{o}{\PYZlt{}} \PY{n}{anzahl\PYZus{}koerper}\PY{p}{:}
-            \PY{n}{kollisions\PYZus{}tag} \PY{o}{=} \PY{p}{(}\PY{n}{i} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{)} \PY{o}{*} \PY{n}{time\PYZus{}step}   \PY{c+c1}{\PYZsh{} genau dieser Schritt verschmolz}
+            \PY{n}{kollisions\PYZus{}tag} \PY{o}{=} \PY{p}{(}\PY{n}{i} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{)} \PY{o}{*} \PY{n}{time\PYZus{}step}
+
+        \PY{c+c1}{\PYZsh{} Koerperzahl fuer den Vergleich im naechsten Schritt aktualisieren.}
         \PY{n}{anzahl\PYZus{}koerper} \PY{o}{=} \PY{n+nb}{len}\PY{p}{(}\PY{n}{sim}\PY{o}{.}\PY{n}{bodies}\PY{p}{)}
 
-    \PY{c+c1}{\PYZsh{} Mit wem ist Theia verschmolzen?}
-    \PY{c+c1}{\PYZsh{} Der Name des verschmolzenen Körpers (\PYZdq{}Theia+Erde\PYZdq{} o.ä.) wird an \PYZdq{}+\PYZdq{} zerlegt;}
-    \PY{c+c1}{\PYZsh{} alle Teile außer \PYZdq{}Theia\PYZdq{} sind die getroffenen Körper.}
+    \PY{c+c1}{\PYZsh{} Nach dem Lauf herausfinden, mit wem Theia verschmolzen ist.}
     \PY{n}{kollision\PYZus{}mit} \PY{o}{=} \PY{k+kc}{None}
+
+    \PY{c+c1}{\PYZsh{} Alle noch lebenden Koerper durchgehen.}
     \PY{k}{for} \PY{n}{b} \PY{o+ow}{in} \PY{n}{sim}\PY{o}{.}\PY{n}{bodies}\PY{p}{:}
+
         \PY{n}{teile} \PY{o}{=} \PY{n}{b}\PY{o}{.}\PY{n}{name}\PY{o}{.}\PY{n}{split}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{+}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+
+        \PY{c+c1}{\PYZsh{} Steckt \PYZdq{}Theia\PYZdq{} im Namen UND noch etwas anderes, ist das der getroffene Koerper.}
         \PY{k}{if} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Theia}\PY{l+s+s2}{\PYZdq{}} \PY{o+ow}{in} \PY{n}{teile} \PY{o+ow}{and} \PY{n+nb}{len}\PY{p}{(}\PY{n}{teile}\PY{p}{)} \PY{o}{\PYZgt{}} \PY{l+m+mi}{1}\PY{p}{:}
+            \PY{c+c1}{\PYZsh{} Die restlichen Namensteile verbinden z.B. \PYZdq{}Erde\PYZdq{} oder \PYZdq{}Erde+Mond\PYZdq{} (ohne Theia)}
             \PY{n}{kollision\PYZus{}mit} \PY{o}{=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{+}\PY{l+s+s2}{\PYZdq{}}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{t} \PY{k}{for} \PY{n}{t} \PY{o+ow}{in} \PY{n}{teile} \PY{k}{if} \PY{n}{t} \PY{o}{!=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Theia}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
 
-    \PY{c+c1}{\PYZsh{} Falls Theia gar nicht verschmolzen ist, gibt es keinen Kollisionstag}
+    \PY{c+c1}{\PYZsh{} Gab es keine Verschmelzung, gibt es auch keinen Kollisionstag.}
     \PY{k}{if} \PY{n}{kollision\PYZus{}mit} \PY{o+ow}{is} \PY{k+kc}{None}\PY{p}{:}
         \PY{n}{kollisions\PYZus{}tag} \PY{o}{=} \PY{k+kc}{None}
 
+
     \PY{n}{ergebnis} \PY{o}{=} \PY{p}{\PYZob{}}
-        \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{speed\PYZus{}kms}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:}        \PY{n}{speed\PYZus{}kms}\PY{p}{,}
-        \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{target}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:}           \PY{n}{target}\PY{p}{,}
-        \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{kollision\PYZus{}mit}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:}    \PY{n}{kollision\PYZus{}mit}\PY{p}{,}
-        \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{kollisions\PYZus{}tag}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:}   \PY{n}{kollisions\PYZus{}tag}\PY{p}{,}
-        \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{min\PYZus{}abstand\PYZus{}erde}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{n}{min\PYZus{}abstand\PYZus{}erde}\PY{p}{,}
-        \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{min\PYZus{}abstand\PYZus{}mond}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{n}{min\PYZus{}abstand\PYZus{}mond}\PY{p}{,}
+        \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{speed\PYZus{}kms}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:}        \PY{n}{speed\PYZus{}kms}\PY{p}{,}        
+        \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{target}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:}           \PY{n}{target}\PY{p}{,}          
+        \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{kollision\PYZus{}mit}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:}    \PY{n}{kollision\PYZus{}mit}\PY{p}{,}    
+        \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{kollisions\PYZus{}tag}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:}   \PY{n}{kollisions\PYZus{}tag}\PY{p}{,}    
+        \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{min\PYZus{}abstand\PYZus{}erde}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{n}{min\PYZus{}abstand\PYZus{}erde}\PY{p}{,}  
+        \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{min\PYZus{}abstand\PYZus{}mond}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{n}{min\PYZus{}abstand\PYZus{}mond}\PY{p}{,}  
     \PY{p}{\PYZcb{}}
+
     \PY{k}{return} \PY{n}{sim}\PY{p}{,} \PY{n}{ergebnis}
 
 
-\PY{c+c1}{\PYZsh{} \PYZhy{}\PYZhy{}\PYZhy{} Vollständige 3x3\PYZhy{}Matrix \PYZhy{}\PYZhy{}\PYZhy{}}
-\PY{c+c1}{\PYZsh{} Jede Geschwindigkeit wird mit jeder Zielrichtung kombiniert \PYZhy{}\PYZgt{} 3 * 3 = 9 Läufe.}
-\PY{c+c1}{\PYZsh{} Die Ergebnisse sammeln wir in einer Liste, die Simulationen in einem Dict (für die}
-\PY{c+c1}{\PYZsh{} spätere Visualisierung gezielt abrufbar über das (Geschwindigkeit, Ziel)\PYZhy{}Tupel).}
-\PY{n}{speeds}  \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{8}\PY{p}{,} \PY{l+m+mi}{12}\PY{p}{]}
-\PY{n}{targets} \PY{o}{=} \PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{mitte}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{mond}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{erde}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}
+\PY{n}{speeds}  \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{8}\PY{p}{,} \PY{l+m+mi}{12}\PY{p}{]}                    \PY{c+c1}{\PYZsh{}v}
+\PY{n}{targets} \PY{o}{=} \PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{mitte}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{mond}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{erde}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}     \PY{c+c1}{\PYZsh{}t}
+
 \PY{n}{ergebnisse}\PY{p}{,} \PY{n}{sims} \PY{o}{=} \PY{p}{[}\PY{p}{]}\PY{p}{,} \PY{p}{\PYZob{}}\PY{p}{\PYZcb{}}
 
 \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Starte 9 Simulationen (3 Geschwindigkeiten x 3 Richtungen)...}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+
 \PY{k}{for} \PY{n}{v} \PY{o+ow}{in} \PY{n}{speeds}\PY{p}{:}
     \PY{k}{for} \PY{n}{t} \PY{o+ow}{in} \PY{n}{targets}\PY{p}{:}
         \PY{n}{sim}\PY{p}{,} \PY{n}{res} \PY{o}{=} \PY{n}{run\PYZus{}theia\PYZus{}scenario}\PY{p}{(}\PY{n}{v}\PY{p}{,} \PY{n}{t}\PY{p}{)}
@@ -1723,87 +1741,144 @@ in 3D.
 
 
 \PY{k}{def}\PY{+w}{ }\PY{n+nf}{fmt\PYZus{}km}\PY{p}{(}\PY{n}{d\PYZus{}m}\PY{p}{)}\PY{p}{:}
-\PY{+w}{    }\PY{l+s+sd}{\PYZdq{}\PYZdq{}\PYZdq{}Meter \PYZhy{}\PYZgt{} lesbarer km\PYZhy{}String.\PYZdq{}\PYZdq{}\PYZdq{}}
+\PY{+w}{    }\PY{l+s+sd}{\PYZdq{}\PYZdq{}\PYZdq{}Formatiert einen Abstand in Metern als lesbaren km\PYZhy{}String.\PYZdq{}\PYZdq{}\PYZdq{}}
     \PY{k}{if} \PY{n}{np}\PY{o}{.}\PY{n}{isnan}\PY{p}{(}\PY{n}{d\PYZus{}m}\PY{p}{)}\PY{p}{:}
         \PY{k}{return} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{n/a}\PY{l+s+s2}{\PYZdq{}}
     \PY{k}{return} \PY{l+s+sa}{f}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+si}{\PYZob{}}\PY{n}{d\PYZus{}m}\PY{+w}{ }\PY{o}{/}\PY{+w}{ }\PY{l+m+mi}{1000}\PY{l+s+si}{:}\PY{l+s+s2}{,.0f}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{ km}\PY{l+s+s2}{\PYZdq{}}
 
 
 \PY{k}{def}\PY{+w}{ }\PY{n+nf}{fmt\PYZus{}koll}\PY{p}{(}\PY{n}{r}\PY{p}{)}\PY{p}{:}
-\PY{+w}{    }\PY{l+s+sd}{\PYZdq{}\PYZdq{}\PYZdq{}Kollisions\PYZhy{}Info mit Tag, oder Strich.\PYZdq{}\PYZdq{}\PYZdq{}}
+\PY{+w}{    }\PY{l+s+sd}{\PYZdq{}\PYZdq{}\PYZdq{}Formatiert die Kollisions\PYZhy{}Info eines Ergebnisses fuer die Tabelle.\PYZdq{}\PYZdq{}\PYZdq{}}
     \PY{k}{if} \PY{n}{r}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{kollision\PYZus{}mit}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o+ow}{is} \PY{k+kc}{None}\PY{p}{:}
         \PY{k}{return} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{— keine —}\PY{l+s+s2}{\PYZdq{}}
     \PY{k}{return} \PY{l+s+sa}{f}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+si}{\PYZob{}}\PY{n}{r}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{kollision\PYZus{}mit}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{  (Tag }\PY{l+s+si}{\PYZob{}}\PY{n}{r}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{kollisions\PYZus{}tag}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{l+s+si}{:}\PY{l+s+s2}{.1f}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{)}\PY{l+s+s2}{\PYZdq{}}
 
 
-\PY{c+c1}{\PYZsh{} Ergebnistabelle ausgeben (rechtsbündig formatiert für saubere Spalten)}
 \PY{n+nb}{print}\PY{p}{(}\PY{l+s+sa}{f}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+si}{\PYZob{}}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{v (km/s)}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+si}{:}\PY{l+s+s2}{\PYZgt{}9}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{ | }\PY{l+s+si}{\PYZob{}}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Richtung}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+si}{:}\PY{l+s+s2}{\PYZgt{}8}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{ | }\PY{l+s+si}{\PYZob{}}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Kollision (Tag)}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+si}{:}\PY{l+s+s2}{\PYZgt{}22}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{ | }\PY{l+s+s2}{\PYZdq{}}
       \PY{l+s+sa}{f}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+si}{\PYZob{}}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Min\PYZhy{}Abst. Erde}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+si}{:}\PY{l+s+s2}{\PYZgt{}16}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{ | }\PY{l+s+si}{\PYZob{}}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Min\PYZhy{}Abst. Mond}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+si}{:}\PY{l+s+s2}{\PYZgt{}16}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+
 \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZhy{}}\PY{l+s+s2}{\PYZdq{}} \PY{o}{*} \PY{l+m+mi}{82}\PY{p}{)}
+
 \PY{k}{for} \PY{n}{r} \PY{o+ow}{in} \PY{n}{ergebnisse}\PY{p}{:}
     \PY{n+nb}{print}\PY{p}{(}\PY{l+s+sa}{f}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+si}{\PYZob{}}\PY{n}{r}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{speed\PYZus{}kms}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{l+s+si}{:}\PY{l+s+s2}{\PYZgt{}9}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{ | }\PY{l+s+si}{\PYZob{}}\PY{n}{r}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{target}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{l+s+si}{:}\PY{l+s+s2}{\PYZgt{}8}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{ | }\PY{l+s+si}{\PYZob{}}\PY{n}{fmt\PYZus{}koll}\PY{p}{(}\PY{n}{r}\PY{p}{)}\PY{l+s+si}{:}\PY{l+s+s2}{\PYZgt{}22}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{ | }\PY{l+s+s2}{\PYZdq{}}
           \PY{l+s+sa}{f}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+si}{\PYZob{}}\PY{n}{fmt\PYZus{}km}\PY{p}{(}\PY{n}{r}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{min\PYZus{}abstand\PYZus{}erde}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}\PY{l+s+si}{:}\PY{l+s+s2}{\PYZgt{}16}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{ | }\PY{l+s+si}{\PYZob{}}\PY{n}{fmt\PYZus{}km}\PY{p}{(}\PY{n}{r}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{min\PYZus{}abstand\PYZus{}mond}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}\PY{l+s+si}{:}\PY{l+s+s2}{\PYZgt{}16}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
 
-\PY{c+c1}{\PYZsh{} Kollisionsfreie Konfigurationen herausfiltern (= Antwort auf die Leitfrage)}
 \PY{n}{ohne} \PY{o}{=} \PY{p}{[}\PY{n}{r} \PY{k}{for} \PY{n}{r} \PY{o+ow}{in} \PY{n}{ergebnisse} \PY{k}{if} \PY{n}{r}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{kollision\PYZus{}mit}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o+ow}{is} \PY{k+kc}{None}\PY{p}{]}
+
 \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s2}{Kollisionsfreie Konfiguration(en):}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}
       \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{, }\PY{l+s+s2}{\PYZdq{}}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{l+s+sa}{f}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+si}{\PYZob{}}\PY{n}{r}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{speed\PYZus{}kms}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{ km/s \PYZhy{}\PYZgt{} }\PY{l+s+si}{\PYZob{}}\PY{n}{r}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{target}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{\PYZdq{}} \PY{k}{for} \PY{n}{r} \PY{o+ow}{in} \PY{n}{ohne}\PY{p}{)} \PY{o+ow}{or} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{keine}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
 \end{Verbatim}
 \end{tcolorbox}
 
+    \begin{Verbatim}[commandchars=\\\{\}]
+Starte 9 Simulationen (3 Geschwindigkeiten x 3 Richtungen){\ldots}
+
+Theia erfolgreich Richtung 'mitte' injiziert.
+Theia erfolgreich Richtung 'mond' injiziert.
+Theia erfolgreich Richtung 'erde' injiziert.
+Theia erfolgreich Richtung 'mitte' injiziert.
+Theia erfolgreich Richtung 'mond' injiziert.
+Theia erfolgreich Richtung 'erde' injiziert.
+Theia erfolgreich Richtung 'mitte' injiziert.
+Theia erfolgreich Richtung 'mond' injiziert.
+Theia erfolgreich Richtung 'erde' injiziert.
+ v (km/s) | Richtung |        Kollision (Tag) |   Min-Abst. Erde |   Min-Abst.
+Mond
+--------------------------------------------------------------------------------
+--
+        3 |    mitte |              — keine — |       141,212 km |       382,285
+km
+        3 |     mond |              — keine — |       331,913 km |       657,016
+km
+        3 |     erde |       Erde  (Tag 14.8) |         8,087 km |       395,150
+km
+        8 |    mitte |              — keine — |       181,169 km |        50,049
+km
+        8 |     mond |              — keine — |       374,209 km |       222,303
+km
+        8 |     erde |        Erde  (Tag 5.7) |         8,361 km |       121,357
+km
+       12 |    mitte |              — keine — |       187,841 km |        70,783
+km
+       12 |     mond |              — keine — |       379,491 km |       106,454
+km
+       12 |     erde |        Erde  (Tag 3.8) |         8,123 km |       248,577
+km
+
+Kollisionsfreie Konfiguration(en): 3 km/s -> mitte, 3 km/s -> mond, 8 km/s ->
+mitte, 8 km/s -> mond, 12 km/s -> mitte, 12 km/s -> mond
+    \end{Verbatim}
+
     \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
-\prompt{In}{incolor}{ }{\boxspacing}
+\prompt{In}{incolor}{52}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-\PY{c+c1}{\PYZsh{} \PYZhy{}\PYZhy{}\PYZhy{} Abstandsdiagramm: Theia \PYZlt{}\PYZhy{}\PYZgt{} Erde für alle 9 Szenarien \PYZhy{}\PYZhy{}\PYZhy{}}
+\PY{c+c1}{\PYZsh{} ============================================================================}
+\PY{c+c1}{\PYZsh{} Abstandsdiagramm: Abstand Theia \PYZlt{}\PYZhy{}\PYZgt{} Erde ueber die Zeit, fuer alle 9 Szenarien.}
+\PY{c+c1}{\PYZsh{} ============================================================================}
+
 \PY{k+kn}{import}\PY{+w}{ }\PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot}\PY{+w}{ }\PY{k}{as}\PY{+w}{ }\PY{n+nn}{plt}
 \PY{k+kn}{import}\PY{+w}{ }\PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{lines}\PY{+w}{ }\PY{k}{as}\PY{+w}{ }\PY{n+nn}{mlines}
 
-\PY{n}{KOLLISIONS\PYZus{}RADIUS\PYZus{}KM} \PY{o}{=} \PY{p}{(}\PY{l+m+mi}{6371} \PY{o}{+} \PY{l+m+mi}{3389}\PY{p}{)}   \PY{c+c1}{\PYZsh{} Erde + Theia in km}
+\PY{c+c1}{\PYZsh{} Kollisionsgrenze in km = Summe der Radien von Erde (6371) und Theia (3389).}
+\PY{c+c1}{\PYZsh{} Faellt der Abstand unter diesen Wert, gilt es als Einschlag.}
+\PY{n}{KOLLISIONS\PYZus{}RADIUS\PYZus{}KM} \PY{o}{=} \PY{p}{(}\PY{l+m+mi}{6371} \PY{o}{+} \PY{l+m+mi}{3389}\PY{p}{)}
 
 \PY{n}{farben} \PY{o}{=} \PY{p}{\PYZob{}}\PY{l+m+mi}{3}\PY{p}{:} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZsh{}4fc3f7}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+m+mi}{8}\PY{p}{:} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZsh{}ffb74d}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+m+mi}{12}\PY{p}{:} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZsh{}ef5350}\PY{l+s+s2}{\PYZdq{}}\PY{p}{\PYZcb{}}
 \PY{n}{stile}  \PY{o}{=} \PY{p}{\PYZob{}}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{mitte}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZhy{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{mond}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZhy{}\PYZhy{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{erde}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{:}\PY{l+s+s2}{\PYZdq{}}\PY{p}{\PYZcb{}}
 
 \PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{11}\PY{p}{,} \PY{l+m+mi}{5}\PY{p}{)}\PY{p}{,} \PY{n}{facecolor}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZsh{}0d0d1a}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+
 \PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}facecolor}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZsh{}0d0d1a}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
 
 \PY{k}{for} \PY{n}{v} \PY{o+ow}{in} \PY{n}{speeds}\PY{p}{:}
     \PY{k}{for} \PY{n}{t} \PY{o+ow}{in} \PY{n}{targets}\PY{p}{:}
+
         \PY{n}{tage}\PY{p}{,} \PY{n}{dist\PYZus{}km} \PY{o}{=} \PY{n}{\PYZus{}abstand\PYZus{}verlauf}\PY{p}{(}\PY{n}{sims}\PY{p}{[}\PY{p}{(}\PY{n}{v}\PY{p}{,} \PY{n}{t}\PY{p}{)}\PY{p}{]}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Erde}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Theia}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+
         \PY{k}{if} \PY{n}{tage}\PY{o}{.}\PY{n}{size} \PY{o}{==} \PY{l+m+mi}{0}\PY{p}{:}
             \PY{k}{continue}
-        
-        \PY{c+c1}{\PYZsh{} Linienstärke leicht erhöht (1.8), damit die Strichmuster beim Zoom besser wirken}
+
+        \PY{c+c1}{\PYZsh{} Abstandskurve zeichnen: Farbe nach Geschwindigkeit, Stil nach Zielrichtung.}
         \PY{n}{ax}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{tage}\PY{p}{,} \PY{n}{dist\PYZus{}km}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{n}{farben}\PY{p}{[}\PY{n}{v}\PY{p}{]}\PY{p}{,} \PY{n}{ls}\PY{o}{=}\PY{n}{stile}\PY{p}{[}\PY{n}{t}\PY{p}{]}\PY{p}{,} \PY{n}{lw}\PY{o}{=}\PY{l+m+mf}{1.8}\PY{p}{,} \PY{n}{alpha}\PY{o}{=}\PY{l+m+mf}{0.85}\PY{p}{)}
 
+        \PY{c+c1}{\PYZsh{} Passendes Ergebnis\PYZhy{}Dict zu (v, t) suchen, um an den Kollisionstag zu kommen.}
         \PY{n}{res} \PY{o}{=} \PY{n+nb}{next}\PY{p}{(}\PY{n}{r} \PY{k}{for} \PY{n}{r} \PY{o+ow}{in} \PY{n}{ergebnisse} \PY{k}{if} \PY{n}{r}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{speed\PYZus{}kms}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{==} \PY{n}{v} \PY{o+ow}{and} \PY{n}{r}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{target}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{==} \PY{n}{t}\PY{p}{)}
+
+        \PY{c+c1}{\PYZsh{} Nur wenn es in diesem Szenario ueberhaupt eine Kollision gab, etwas markieren.}
         \PY{k}{if} \PY{n}{res}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{kollisions\PYZus{}tag}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o+ow}{is} \PY{o+ow}{not} \PY{k+kc}{None}\PY{p}{:}
+
+            \PY{c+c1}{\PYZsh{} Den Kollisionstag herausgreifen.}
             \PY{n}{kt} \PY{o}{=} \PY{n}{res}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{kollisions\PYZus{}tag}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}
+
+            \PY{c+c1}{\PYZsh{} Senkrechte Markierungslinie am Kollisionstag einzeichnen.}
             \PY{n}{ax}\PY{o}{.}\PY{n}{axvline}\PY{p}{(}\PY{n}{kt}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{n}{farben}\PY{p}{[}\PY{n}{v}\PY{p}{]}\PY{p}{,} \PY{n}{ls}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{:}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{lw}\PY{o}{=}\PY{l+m+mf}{0.8}\PY{p}{,} \PY{n}{alpha}\PY{o}{=}\PY{l+m+mf}{0.5}\PY{p}{)}
-            
-            \PY{c+c1}{\PYZsh{} Der Text schwebt nun konstant 35.000 km über der Nulllinie, leicht nach rechts versetzt}
+
+            \PY{c+c1}{\PYZsh{} Beschriftung \PYZdq{}Tag X\PYZdq{} mit Pfeil an die Kollisionsstelle setzen.}
             \PY{n}{ax}\PY{o}{.}\PY{n}{annotate}\PY{p}{(}\PY{l+s+sa}{f}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Tag }\PY{l+s+si}{\PYZob{}}\PY{n}{kt}\PY{l+s+si}{:}\PY{l+s+s2}{.1f}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{xy}\PY{o}{=}\PY{p}{(}\PY{n}{kt}\PY{p}{,} \PY{n}{KOLLISIONS\PYZus{}RADIUS\PYZus{}KM}\PY{p}{)}\PY{p}{,}
                         \PY{n}{xytext}\PY{o}{=}\PY{p}{(}\PY{n}{kt} \PY{o}{+} \PY{l+m+mf}{0.4}\PY{p}{,} \PY{l+m+mi}{35\PYZus{}000}\PY{p}{)}\PY{p}{,}
                         \PY{n}{color}\PY{o}{=}\PY{n}{farben}\PY{p}{[}\PY{n}{v}\PY{p}{]}\PY{p}{,} \PY{n}{fontsize}\PY{o}{=}\PY{l+m+mi}{8}\PY{p}{,} \PY{n}{fontweight}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{bold}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}
                         \PY{n}{arrowprops}\PY{o}{=}\PY{n+nb}{dict}\PY{p}{(}\PY{n}{arrowstyle}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZhy{}\PYZgt{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{n}{farben}\PY{p}{[}\PY{n}{v}\PY{p}{]}\PY{p}{,} \PY{n}{lw}\PY{o}{=}\PY{l+m+mf}{1.2}\PY{p}{,} \PY{n}{alpha}\PY{o}{=}\PY{l+m+mf}{0.8}\PY{p}{)}\PY{p}{)}
 
+\PY{c+c1}{\PYZsh{} Waagerechte goldene Linie = Kollisionsgrenze (Summe der Radien).}
 \PY{n}{ax}\PY{o}{.}\PY{n}{axhline}\PY{p}{(}\PY{n}{KOLLISIONS\PYZus{}RADIUS\PYZus{}KM}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{gold}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{lw}\PY{o}{=}\PY{l+m+mf}{1.2}\PY{p}{,} \PY{n}{ls}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZhy{}\PYZhy{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{zorder}\PY{o}{=}\PY{l+m+mi}{5}\PY{p}{)}
 
 \PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}xlabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Zeit [Tage]}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{white}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{fontsize}\PY{o}{=}\PY{l+m+mi}{10}\PY{p}{)}
 \PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}ylabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Abstand Theia – Erde [km]}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{white}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{fontsize}\PY{o}{=}\PY{l+m+mi}{10}\PY{p}{)}
 \PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}title}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Abstandsverlauf Theia – Erde (Fokus auf Annäherungsphase)}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{white}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{fontsize}\PY{o}{=}\PY{l+m+mi}{12}\PY{p}{)}
-
 \PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}xlim}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{30}\PY{p}{)}
-
-\PY{c+c1}{\PYZsh{} DER ZOOM: Wir betrachten nur noch die relevantesten 600.000 km (ca. 1.5x Monddistanz)}
-\PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}ylim}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{600\PYZus{}000}\PY{p}{)} 
-
+\PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}ylim}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{600\PYZus{}000}\PY{p}{)}
 \PY{n}{ax}\PY{o}{.}\PY{n}{tick\PYZus{}params}\PY{p}{(}\PY{n}{colors}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{white}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{} Rahmenfarbe }
 \PY{k}{for} \PY{n}{sp} \PY{o+ow}{in} \PY{n}{ax}\PY{o}{.}\PY{n}{spines}\PY{o}{.}\PY{n}{values}\PY{p}{(}\PY{p}{)}\PY{p}{:}
     \PY{n}{sp}\PY{o}{.}\PY{n}{set\PYZus{}edgecolor}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZsh{}444466}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-    
-\PY{n}{ax}\PY{o}{.}\PY{n}{grid}\PY{p}{(}\PY{k+kc}{True}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{white}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{alpha}\PY{o}{=}\PY{l+m+mf}{0.1}\PY{p}{)} \PY{c+c1}{\PYZsh{} Grid minimal sichtbarer gemacht}
+
+\PY{c+c1}{\PYZsh{} Dezentes Gitter }
+\PY{n}{ax}\PY{o}{.}\PY{n}{grid}\PY{p}{(}\PY{k+kc}{True}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{white}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{alpha}\PY{o}{=}\PY{l+m+mf}{0.1}\PY{p}{)}
+
 \PY{n}{ax}\PY{o}{.}\PY{n}{yaxis}\PY{o}{.}\PY{n}{set\PYZus{}major\PYZus{}formatter}\PY{p}{(}\PY{n}{plt}\PY{o}{.}\PY{n}{FuncFormatter}\PY{p}{(}\PY{k}{lambda} \PY{n}{x}\PY{p}{,} \PY{n}{\PYZus{}}\PY{p}{:} \PY{l+s+sa}{f}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+si}{\PYZob{}}\PY{n}{x}\PY{o}{/}\PY{l+m+mi}{1000}\PY{l+s+si}{:}\PY{l+s+s2}{,.0f}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{ Tkm}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{p}{)}
 
+\PY{c+c1}{\PYZsh{} Legende }
 \PY{n}{legend\PYZus{}handles} \PY{o}{=} \PY{p}{(}
     \PY{p}{[}\PY{n}{mlines}\PY{o}{.}\PY{n}{Line2D}\PY{p}{(}\PY{p}{[}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{p}{]}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{n}{farben}\PY{p}{[}\PY{n}{v}\PY{p}{]}\PY{p}{,} \PY{n}{lw}\PY{o}{=}\PY{l+m+mf}{2.5}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+sa}{f}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+si}{\PYZob{}}\PY{n}{v}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{ km/s}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{k}{for} \PY{n}{v} \PY{o+ow}{in} \PY{n}{speeds}\PY{p}{]} \PY{o}{+}
     \PY{p}{[}\PY{n}{mlines}\PY{o}{.}\PY{n}{Line2D}\PY{p}{(}\PY{p}{[}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{p}{]}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{white}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{ls}\PY{o}{=}\PY{n}{stile}\PY{p}{[}\PY{n}{t}\PY{p}{]}\PY{p}{,} \PY{n}{lw}\PY{o}{=}\PY{l+m+mf}{2.0}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+sa}{f}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Ziel: }\PY{l+s+si}{\PYZob{}}\PY{n}{t}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{k}{for} \PY{n}{t} \PY{o+ow}{in} \PY{n}{targets}\PY{p}{]} \PY{o}{+}
@@ -1816,6 +1891,12 @@ in 3D.
 \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
 \end{Verbatim}
 \end{tcolorbox}
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{img/diagram_theia.png}}
+\caption{Bild}
+\end{figure}
 
     \subsection{Beobachtungen}\label{beobachtungen}
 
@@ -1863,22 +1944,27 @@ verändert nur die Flugzeit und die Bahnkrümmung, nicht aber das
 grundsätzliche „Treffer-oder-Vorbeiflug''-Ergebnis.
 
     \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
-\prompt{In}{incolor}{ }{\boxspacing}
+\prompt{In}{incolor}{21}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-\PY{c+c1}{\PYZsh{} \PYZhy{}\PYZhy{}\PYZhy{} Repräsentativer KOLLISIONS\PYZhy{}Fall (erster Treffer aus der Matrix) \PYZhy{}\PYZhy{}\PYZhy{}}
+\PY{c+c1}{\PYZsh{} ============================================================================}
+\PY{c+c1}{\PYZsh{} Repraesentativer KOLLISIONS\PYZhy{}Fall: erstes Szenario der 3x3\PYZhy{}Matrix mit Einschlag.}
+\PY{c+c1}{\PYZsh{} ============================================================================}
 
-\PY{c+c1}{\PYZsh{} View Setting}
 \PY{n}{view} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{top}\PY{l+s+s1}{\PYZsq{}}
 \PY{c+c1}{\PYZsh{} view = \PYZsq{}side\PYZsq{}}
 \PY{c+c1}{\PYZsh{} view = \PYZsq{}standard\PYZsq{}}
 
 \PY{n}{kollisions\PYZus{}faelle} \PY{o}{=} \PY{p}{[}\PY{n}{r} \PY{k}{for} \PY{n}{r} \PY{o+ow}{in} \PY{n}{ergebnisse} \PY{k}{if} \PY{n}{r}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{kollision\PYZus{}mit}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o+ow}{is} \PY{o+ow}{not} \PY{k+kc}{None}\PY{p}{]}
+
 \PY{k}{if} \PY{n}{kollisions\PYZus{}faelle}\PY{p}{:}
+
     \PY{n}{r} \PY{o}{=} \PY{n}{kollisions\PYZus{}faelle}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}
     \PY{n+nb}{print}\PY{p}{(}\PY{l+s+sa}{f}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{KOLLISION: }\PY{l+s+si}{\PYZob{}}\PY{n}{r}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{speed\PYZus{}kms}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{ km/s Richtung }\PY{l+s+s2}{\PYZsq{}}\PY{l+s+si}{\PYZob{}}\PY{n}{r}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{target}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{\PYZsq{}}\PY{l+s+s2}{ \PYZhy{}\PYZgt{} Theia trifft }\PY{l+s+si}{\PYZob{}}\PY{n}{r}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{kollision\PYZus{}mit}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
     \PY{n}{sel\PYZus{}sim} \PY{o}{=} \PY{n}{sims}\PY{p}{[}\PY{p}{(}\PY{n}{r}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{speed\PYZus{}kms}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{,} \PY{n}{r}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{target}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{)}\PY{p}{]}
+
     \PY{n}{anim\PYZus{}kollision} \PY{o}{=} \PY{n}{Visualizer}\PY{p}{(}\PY{n}{sel\PYZus{}sim}\PY{p}{)}\PY{o}{.}\PY{n}{animate\PYZus{}3d}\PY{p}{(}\PY{n}{view}\PY{o}{=}\PY{n}{view}\PY{p}{,} \PY{n}{performance\PYZus{}mode}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{dynamic\PYZus{}scaling}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
     \PY{n}{anim\PYZus{}kollision\PYZus{}static} \PY{o}{=} \PY{n}{Visualizer}\PY{p}{(}\PY{n}{sel\PYZus{}sim}\PY{p}{)}\PY{o}{.}\PY{n}{animate\PYZus{}3d}\PY{p}{(}\PY{n}{view}\PY{o}{=}\PY{n}{view}\PY{p}{,} \PY{n}{performance\PYZus{}mode}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{dynamic\PYZus{}scaling}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}
+
 \PY{k}{else}\PY{p}{:}
     \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{In keiner der neun Konfigurationen kam es zu einer Kollision.}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
     \PY{n}{anim\PYZus{}kollision} \PY{o}{=} \PY{k+kc}{None}
@@ -1889,24 +1975,50 @@ grundsätzliche „Treffer-oder-Vorbeiflug''-Ergebnis.
 \end{Verbatim}
 \end{tcolorbox}
 
+    \begin{Verbatim}[commandchars=\\\{\}]
+KOLLISION: 3 km/s Richtung 'erde' -> Theia trifft Erde
+    \end{Verbatim}
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+<IPython.core.display.HTML object>
+    \end{Verbatim}
+
+    
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+<IPython.core.display.HTML object>
+    \end{Verbatim}
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{img/theia_colides_earth.png}}
+\caption{Bild}
+\end{figure}
+
+    
     \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
-\prompt{In}{incolor}{ }{\boxspacing}
+\prompt{In}{incolor}{22}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-\PY{c+c1}{\PYZsh{} View Setting}
+\PY{c+c1}{\PYZsh{} ============================================================================}
+\PY{c+c1}{\PYZsh{} Repraesentativer KOLLISIONSFREIER Fall: erster Vorbeiflug der 3x3\PYZhy{}Matrix.}
+\PY{c+c1}{\PYZsh{} ============================================================================}
+
 \PY{c+c1}{\PYZsh{} view = \PYZsq{}top\PYZsq{}}
 \PY{c+c1}{\PYZsh{} view = \PYZsq{}side\PYZsq{}}
 \PY{n}{view} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{standard}\PY{l+s+s1}{\PYZsq{}}
 
-\PY{c+c1}{\PYZsh{} \PYZhy{}\PYZhy{}\PYZhy{} Repräsentativer KOLLISIONSFREIER Fall (erster Vorbeiflug aus der Matrix), falls vorhanden \PYZhy{}\PYZhy{}\PYZhy{}}
-\PY{c+c1}{\PYZsh{} dynamic\PYZus{}scaling=True: mitlaufender Zoom, damit der Vorbeiflug an Erde/Mond gut erkennbar ist.}
 \PY{n}{freie\PYZus{}faelle} \PY{o}{=} \PY{p}{[}\PY{n}{r} \PY{k}{for} \PY{n}{r} \PY{o+ow}{in} \PY{n}{ergebnisse} \PY{k}{if} \PY{n}{r}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{kollision\PYZus{}mit}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o+ow}{is} \PY{k+kc}{None}\PY{p}{]}
+
 \PY{k}{if} \PY{n}{freie\PYZus{}faelle}\PY{p}{:}
+
     \PY{n}{r} \PY{o}{=} \PY{n}{freie\PYZus{}faelle}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}
     \PY{n+nb}{print}\PY{p}{(}\PY{l+s+sa}{f}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{KEINE Kollision: }\PY{l+s+si}{\PYZob{}}\PY{n}{r}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{speed\PYZus{}kms}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{ km/s Richtung }\PY{l+s+s2}{\PYZsq{}}\PY{l+s+si}{\PYZob{}}\PY{n}{r}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{target}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{\PYZsq{}}\PY{l+s+s2}{ }\PY{l+s+s2}{\PYZdq{}}
           \PY{l+s+sa}{f}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{(min. Abstand zur Erde }\PY{l+s+si}{\PYZob{}}\PY{n}{r}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{min\PYZus{}abstand\PYZus{}erde}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{l+s+si}{:}\PY{l+s+s2}{.3e}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{ m, zum Mond }\PY{l+s+si}{\PYZob{}}\PY{n}{r}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{min\PYZus{}abstand\PYZus{}mond}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{l+s+si}{:}\PY{l+s+s2}{.3e}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{ m)}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
     \PY{n}{sel\PYZus{}sim} \PY{o}{=} \PY{n}{sims}\PY{p}{[}\PY{p}{(}\PY{n}{r}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{speed\PYZus{}kms}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{,} \PY{n}{r}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{target}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{)}\PY{p}{]}
+
     \PY{n}{anim\PYZus{}frei} \PY{o}{=} \PY{n}{Visualizer}\PY{p}{(}\PY{n}{sel\PYZus{}sim}\PY{p}{)}\PY{o}{.}\PY{n}{animate\PYZus{}3d}\PY{p}{(}\PY{n}{view}\PY{o}{=}\PY{n}{view}\PY{p}{,} \PY{n}{performance\PYZus{}mode}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{dynamic\PYZus{}scaling}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
     \PY{n}{anim\PYZus{}frei\PYZus{}static} \PY{o}{=} \PY{n}{Visualizer}\PY{p}{(}\PY{n}{sel\PYZus{}sim}\PY{p}{)}\PY{o}{.}\PY{n}{animate\PYZus{}3d}\PY{p}{(}\PY{n}{view}\PY{o}{=}\PY{n}{view}\PY{p}{,} \PY{n}{performance\PYZus{}mode}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{dynamic\PYZus{}scaling}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}
+
 \PY{k}{else}\PY{p}{:}
     \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Jede der neun Konfigurationen führte zu einer Kollision – kein kollisionsfreier Fall vorhanden.}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
     \PY{n}{anim\PYZus{}frei} \PY{o}{=} \PY{k+kc}{None}
@@ -1917,6 +2029,28 @@ grundsätzliche „Treffer-oder-Vorbeiflug''-Ergebnis.
 \end{Verbatim}
 \end{tcolorbox}
 
+    \begin{Verbatim}[commandchars=\\\{\}]
+KEINE Kollision: 3 km/s Richtung 'mitte' (min. Abstand zur Erde 1.412e+08 m, zum
+Mond 3.823e+08 m)
+    \end{Verbatim}
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+<IPython.core.display.HTML object>
+    \end{Verbatim}
+
+    
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+<IPython.core.display.HTML object>
+    \end{Verbatim}
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{img/theia_misses_earth.png}}
+\caption{Bild}
+\end{figure}
+    
 \subsection{Bonus: Mond-Crash und Doppel-Crash}
 
 \textbf{Wie wir diese Kombinationen gefunden haben.} Die Werte sind
@@ -1957,48 +2091,99 @@ Als repräsentative Werte zeigen wir unten \texttt{2,0\ km/s} (Mond) und
 \texttt{6,2\ km/s} (Doppel).
 
     \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
-\prompt{In}{incolor}{ }{\boxspacing}
+\prompt{In}{incolor}{24}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-\PY{c+c1}{\PYZsh{} View Setting}
+\PY{c+c1}{\PYZsh{} ============================================================================}
+\PY{c+c1}{\PYZsh{} BONUS MOND\PYZhy{}CRASH: Theia trifft gezielt den Mond.}
+\PY{c+c1}{\PYZsh{} ============================================================================}
+
 \PY{n}{view} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{top}\PY{l+s+s1}{\PYZsq{}}
 \PY{c+c1}{\PYZsh{} view = \PYZsq{}side\PYZsq{}}
 \PY{c+c1}{\PYZsh{} view = \PYZsq{}standard\PYZsq{}}
 
-\PY{c+c1}{\PYZsh{} \PYZhy{}\PYZhy{}\PYZhy{} MOND\PYZhy{}CRASH: Theia trifft gezielt den Mond \PYZhy{}\PYZhy{}\PYZhy{}}
+\PY{c+c1}{\PYZsh{} Eigener Lauf ausserhalb der 3x3\PYZhy{}Matrix: 2.0 km/s Richtung Mond, 50 Tage lang}
 \PY{n}{sim\PYZus{}mond}\PY{p}{,} \PY{n}{res\PYZus{}mond} \PY{o}{=} \PY{n}{run\PYZus{}theia\PYZus{}scenario}\PY{p}{(}\PY{l+m+mf}{2.0}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{mond}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{total\PYZus{}time}\PY{o}{=}\PY{l+m+mi}{50}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{} Welcher Koerper wurde getroffen?}
 \PY{n+nb}{print}\PY{p}{(}\PY{l+s+sa}{f}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{MOND\PYZhy{}CRASH: 2.0 km/s Richtung }\PY{l+s+s2}{\PYZsq{}}\PY{l+s+s2}{mond}\PY{l+s+s2}{\PYZsq{}}\PY{l+s+s2}{ \PYZhy{}\PYZgt{} Theia trifft: }\PY{l+s+si}{\PYZob{}}\PY{n}{res\PYZus{}mond}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{kollision\PYZus{}mit}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{} Zusaetzlich den kleinsten Abstand zur Erde ausgeben.}
 \PY{n+nb}{print}\PY{p}{(}\PY{l+s+sa}{f}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{(Kleinster Abstand zur Erde: }\PY{l+s+si}{\PYZob{}}\PY{n}{res\PYZus{}mond}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{min\PYZus{}abstand\PYZus{}erde}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{l+s+si}{:}\PY{l+s+s2}{.3e}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{ m)}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
 
-\PY{c+c1}{\PYZsh{} Gleiche Visualisierungsfunktion wie oben.}
 \PY{n}{anim\PYZus{}mond\PYZus{}crash} \PY{o}{=} \PY{n}{Visualizer}\PY{p}{(}\PY{n}{sim\PYZus{}mond}\PY{p}{)}\PY{o}{.}\PY{n}{animate\PYZus{}3d}\PY{p}{(}\PY{n}{view}\PY{o}{=}\PY{n}{view}\PY{p}{,} \PY{n}{performance\PYZus{}mode}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{dynamic\PYZus{}scaling}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
 \PY{n}{anim\PYZus{}mond\PYZus{}crash\PYZus{}static} \PY{o}{=} \PY{n}{Visualizer}\PY{p}{(}\PY{n}{sim\PYZus{}mond}\PY{p}{)}\PY{o}{.}\PY{n}{animate\PYZus{}3d}\PY{p}{(}\PY{n}{view}\PY{o}{=}\PY{n}{view}\PY{p}{,} \PY{n}{performance\PYZus{}mode}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{dynamic\PYZus{}scaling}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}
+
 \PY{n}{display}\PY{p}{(}\PY{n}{anim\PYZus{}mond\PYZus{}crash}\PY{p}{)}
 \PY{n}{display}\PY{p}{(}\PY{n}{anim\PYZus{}mond\PYZus{}crash\PYZus{}static}\PY{p}{)}
 \end{Verbatim}
 \end{tcolorbox}
 
+    \begin{Verbatim}[commandchars=\\\{\}]
+Theia erfolgreich Richtung 'mond' injiziert.
+MOND-CRASH: 2.0 km/s Richtung 'mond' -> Theia trifft: Mond
+(Kleinster Abstand zur Erde: 2.914e+08 m)
+    \end{Verbatim}
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+<IPython.core.display.HTML object>
+    \end{Verbatim}
+
+    
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+<IPython.core.display.HTML object>
+    \end{Verbatim}
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{img/theia_colides_moon.png}}
+\caption{Bild}
+\end{figure}
+
+    
     \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
-\prompt{In}{incolor}{ }{\boxspacing}
+\prompt{In}{incolor}{23}{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-\PY{c+c1}{\PYZsh{} View Setting}
+\PY{c+c1}{\PYZsh{} ============================================================================}
+\PY{c+c1}{\PYZsh{} BONUS DOPPEL\PYZhy{}CRASH: Theia trifft in einem einzigen Anflug BEIDE Koerper.}
+\PY{c+c1}{\PYZsh{} ============================================================================}
+
 \PY{n}{view} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{top}\PY{l+s+s1}{\PYZsq{}}
 \PY{c+c1}{\PYZsh{} view = \PYZsq{}side\PYZsq{}}
 \PY{c+c1}{\PYZsh{} view = \PYZsq{}standard\PYZsq{}}
 
-\PY{c+c1}{\PYZsh{} \PYZhy{}\PYZhy{}\PYZhy{} DOPPEL\PYZhy{}CRASH: Theia trifft BEIDE Körper in einem einzigen Anflug \PYZhy{}\PYZhy{}\PYZhy{}}
-\PY{c+c1}{\PYZsh{} Eigener Lauf bei 6.2 km/s Richtung \PYZsq{}erde\PYZsq{}; total\PYZus{}time=20 Tage reicht, da beide}
-\PY{c+c1}{\PYZsh{} Einschläge (Mond \PYZti{}6.7 Tage, Erde \PYZti{}7.4 Tage) lange davor passieren.}
+\PY{c+c1}{\PYZsh{} Eigener Lauf bei 6.2 km/s Richtung Erde, 20 Tage lang}
 \PY{n}{sim\PYZus{}doppel}\PY{p}{,} \PY{n}{res\PYZus{}doppel} \PY{o}{=} \PY{n}{run\PYZus{}theia\PYZus{}scenario}\PY{p}{(}\PY{l+m+mf}{6.2}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{erde}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{total\PYZus{}time}\PY{o}{=}\PY{l+m+mi}{20}\PY{p}{)}
 \PY{n+nb}{print}\PY{p}{(}\PY{l+s+sa}{f}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{DOPPEL\PYZhy{}CRASH: 6.2 km/s Richtung }\PY{l+s+s2}{\PYZsq{}}\PY{l+s+s2}{erde}\PY{l+s+s2}{\PYZsq{}}\PY{l+s+s2}{ \PYZhy{}\PYZgt{} Theia trifft: }\PY{l+s+si}{\PYZob{}}\PY{n}{res\PYZus{}doppel}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{kollision\PYZus{}mit}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
 
-\PY{c+c1}{\PYZsh{} Gleiche Visualisierungsfunktion wie oben: einmal mit mitlaufendem Zoom (dynamic\PYZus{}scaling=True),}
-\PY{c+c1}{\PYZsh{} einmal mit festem Maßstab (dynamic\PYZus{}scaling=False).}
 \PY{n}{anim\PYZus{}doppel\PYZus{}crash} \PY{o}{=} \PY{n}{Visualizer}\PY{p}{(}\PY{n}{sim\PYZus{}doppel}\PY{p}{)}\PY{o}{.}\PY{n}{animate\PYZus{}3d}\PY{p}{(}\PY{n}{view}\PY{o}{=}\PY{n}{view}\PY{p}{,} \PY{n}{performance\PYZus{}mode}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{dynamic\PYZus{}scaling}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
 \PY{n}{anim\PYZus{}doppel\PYZus{}crash\PYZus{}static} \PY{o}{=} \PY{n}{Visualizer}\PY{p}{(}\PY{n}{sim\PYZus{}doppel}\PY{p}{)}\PY{o}{.}\PY{n}{animate\PYZus{}3d}\PY{p}{(}\PY{n}{view}\PY{o}{=}\PY{n}{view}\PY{p}{,} \PY{n}{performance\PYZus{}mode}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{dynamic\PYZus{}scaling}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}
+
 \PY{n}{display}\PY{p}{(}\PY{n}{anim\PYZus{}doppel\PYZus{}crash}\PY{p}{)}
 \PY{n}{display}\PY{p}{(}\PY{n}{anim\PYZus{}doppel\PYZus{}crash\PYZus{}static}\PY{p}{)}
 \end{Verbatim}
 \end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Theia erfolgreich Richtung 'erde' injiziert.
+DOPPEL-CRASH: 6.2 km/s Richtung 'erde' -> Theia trifft: Erde+Mond
+    \end{Verbatim}
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+<IPython.core.display.HTML object>
+    \end{Verbatim}
+
+    
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+<IPython.core.display.HTML object>
+    \end{Verbatim}
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{img/theia_colides_both.png}}
+\caption{Bild}
+\end{figure}
 
     \section{UnitTests}\label{unittests}
 
@@ -2353,6 +2538,22 @@ mathematischen Regressionen verursachen.
     \PY{n}{runner}\PY{o}{.}\PY{n}{run}\PY{p}{(}\PY{n}{suite}\PY{p}{)}
 \end{Verbatim}
 \end{tcolorbox}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}
+\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}
+\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}\textcolor{ansi-green}{.}
+----------------------------------------------------------------------
+Ran 24 tests in 0.221s
+
+\textcolor{ansi-green}{OK}
+    \end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Theia erfolgreich Richtung 'erde' injiziert.
+Theia erfolgreich Richtung 'mitte' injiziert.
+    \end{Verbatim}
 
 
 \begin{thebibliography}{10} % '10' reserviert Platz für zweistellige Nummern
